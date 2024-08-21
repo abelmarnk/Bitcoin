@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include=".h">
+      <UniqueIdentifier>{237a46f6-bb40-4855-bebf-cfdd649ac0eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include=".cpp">
+      <UniqueIdentifier>{224c1a48-359b-48e4-9e80-1ea08b8d9ade}</UniqueIdentifier>
+    </Filter>
+    <Filter Include=".cpp\main">
+      <UniqueIdentifier>{39a8c81b-1237-4c32-9901-1d92330f14a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include=".cpp\test">
+      <UniqueIdentifier>{c72c3ba6-c0cf-49d9-8bcb-a3223ea8ae7a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Compute.h">
+      <Filter>.h</Filter>
+    </ClInclude>
+    <ClInclude Include="Creation and validation.h">
+      <Filter>.h</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypt.h">
+      <Filter>.h</Filter>
+    </ClInclude>
+    <ClInclude Include="Serial.h">
+      <Filter>.h</Filter>
+    </ClInclude>
+    <ClInclude Include="Script.h">
+      <Filter>.h</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug functions.h">
+      <Filter>.h</Filter>
+    </ClInclude>
+    <ClInclude Include="Transaction.h">
+      <Filter>.h</Filter>
+    </ClInclude>
+    <ClInclude Include="Variant.h">
+      <Filter>.h</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>.cpp\main</Filter>
+    </ClCompile>
+    <ClCompile Include="Compute.cpp">
+      <Filter>.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Script.cpp">
+      <Filter>.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Transaction.cpp">
+      <Filter>.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Variant.cpp">
+      <Filter>.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Crypt.cpp">
+      <Filter>.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>.cpp\test</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug functions.cpp">
+      <Filter>.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Serial.cpp">
+      <Filter>.cpp</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
