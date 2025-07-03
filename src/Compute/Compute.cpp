@@ -12,7 +12,7 @@ BigNum::ContextType BigNum::context() const{
 
 BigNum::BigNum(const std::string& number) :number(nullptr, &free_big_number) {
 	if (number.size() == 0)
-		throw ArithmeticError(ArithmeticError::Type::NUMBER_IS_NULL, "An std::string of size zero cannot be used for initialization, use the default constructor instead.");
+		throw ArithmeticError(ArithmeticError::Type::NUMBER_IS_NULL, "An  std::string of size zero cannot be used for initialization, use the default constructor instead.");
 
 	BIGNUM* BigNumber = BN_new();
 
