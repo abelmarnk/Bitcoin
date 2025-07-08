@@ -313,8 +313,10 @@ public:
 
 	std::vector<uint8_t> get_bip143_transaction_hash(uint64_t input_index, std::vector<uint8_t>& script_code, int64_t script_size = -1);
 
+	// This function is used to check if an input at a given index is valid.
 	bool is_valid(uint32_t index);
 	
+	// This function does not check for double spends, just the script sig and the amount.
 	bool is_valid();
 
 	bool is_coinbase();

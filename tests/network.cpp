@@ -14,7 +14,7 @@
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
-#include "/home/abel/Documents/-Libraries/catch/catch_amalgamated.hpp"
+#include <catch/catch_amalgamated.hpp>
 using namespace boost::asio::experimental::awaitable_operators;
 
 using boost::asio::awaitable;

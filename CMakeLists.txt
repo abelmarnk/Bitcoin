@@ -50,25 +50,23 @@ set(TEST_SOURCES
     "tests/block.cpp"
     "tests/serial.cpp"
     "tests/network.cpp"
-    "/home/abel/Documents/-Libraries/catch/catch_amalgamated.cpp"
+    "/path_to_catch_amalgamated.cpp"
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Using debug sanitizers")
 
-    # Apply these options to both your main executable and your test executable
     add_compile_options(-g -fsanitize=address -fno-omit-frame-pointer -O1)
     add_link_options(-fsanitize=address)
 endif()
 
 
-# ---Tests---
 add_executable(BitcoinCpp_Tests ${APP_SOURCES} ${TEST_SOURCES}  ${APP_HEADERS})
 
-# Include directories for the test executable
 target_include_directories(BitcoinCpp_Tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/
-    /home/abel/Documents/-Libraries/
+    /path_to_nhollmann_json/
+    /path_to_catch_2/
     ${Boost_INCLUDE_DIRS}
 )
 

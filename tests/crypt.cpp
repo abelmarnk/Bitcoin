@@ -1,6 +1,6 @@
 #include "../src/Crypt/Crypt.h"
 #include "../src/Compute/Compute.h"
-#include "/home/abel/Documents/-Libraries/catch/catch_amalgamated.hpp"
+#include <catch/catch_amalgamated.hpp>
 
 
 TEST_CASE("ECDSA test", "[crypto]") {

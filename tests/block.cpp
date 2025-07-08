@@ -1,5 +1,5 @@
 #include "../src/Block/Block.h"
-#include "/home/abel/Documents/-Libraries/catch/catch_amalgamated.hpp"
+#include <catch/catch_amalgamated.hpp>
 
 TEST_CASE("Block", "[block][serialization][parsing][proof-of-work]") {
     std::string block_hex = GENERATE(

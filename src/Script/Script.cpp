@@ -378,16 +378,6 @@ void Script::inputs_from_bytes(std::vector<uint8_t>::const_iterator&& input, uin
 	
 }
 
-bool Script::evaluate_with_script_pubkey(const std::vector<uint8_t>& Hash, const Script& script_pubkey, const std::vector<std::vector<uint8_t>>& witness_data) {
-	
-	return false;
-}
-
-bool Script::evaluate_with_script_sig(const std::vector<uint8_t>& Hash, const Script& script_sig, const std::vector<std::vector<uint8_t>>& witness_data) {
-	
-	return false;
-}
-
 // Fix needed: The input stack is left in an inconsistent state if an unexpected error is thrown.
 bool Script::evaluate(const std::vector<uint8_t>& Hash, const std::vector<std::vector<uint8_t>>& witness_data) {
 	// Stores data operands.

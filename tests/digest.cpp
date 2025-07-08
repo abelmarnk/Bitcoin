@@ -1,5 +1,5 @@
 #include "../src/Crypt/Crypt.h"
-#include "/home/abel/Documents/-Libraries/catch/catch_amalgamated.hpp"
+#include <catch/catch_amalgamated.hpp>
 
 bool test_get_hash_160_vs_digeststream() {
     std::vector<std::vector<uint8_t>> test_vectors = {
