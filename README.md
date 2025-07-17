@@ -2,6 +2,7 @@ This project is a personal exploration of the internals of Bitcoin. It is not a 
 
 
 What it does
+
 Transaction Parsing and Serialization:
 Parses and serializes Bitcoin transactions, providing insight into the structure and encoding of Bitcoin data.
 Transaction Validation:
