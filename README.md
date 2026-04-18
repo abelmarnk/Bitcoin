@@ -1,7 +1,6 @@
-# Bitcoin C++ Project
+# Bitcoin Project
 
-This is a C++23 reimplementation of the concepts from Jimmy Song's *Programming Bitcoin*. It is a study project, not a production Bitcoin node or wallet.
-
+This is a C++23 reimplementation of the concepts from Jimmy Song's *Programming Bitcoin*.
 ## Current State
 
 The project currently does the following:
@@ -25,7 +24,6 @@ This project does not try to be a full Bitcoin implementation. In particular, it
 - Provide wallet features, address management, or key storage.
 - Expose a GUI or RPC server.
 - Aim for full consensus coverage.
-- Guarantee network-dependent tests will pass offline; those tests contact external services and can time out if the network is unavailable.
 
 ## Requirements
 
