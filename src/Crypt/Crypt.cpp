@@ -5,8 +5,7 @@ BigFieldElement BigFieldElement::operator^(BigNum exponent) const {
 	if (exponent < 0) {
 		exponent.set_absolute();
 		return (*this ^ (prime - 2)) ^ exponent;
-	}
-	else {
+	} else {
 		return BigFieldElement(number.mod_exp(exponent, prime), prime);
 	}
 }
@@ -27,8 +26,8 @@ std::vector<uint8_t> Signature::der_to_std_vec() {
 	auto r = this->r.to_std_vec();
 	auto s = this->s.to_std_vec();
 
-	bin.push_back(1 + 1 + r.size() + static_cast<uint64_t>((*(r.begin()) >= 0x80 ? 1 : 0)) + 
-					1 + 1 + s.size() + static_cast<uint64_t>((*(s.begin()) >= 0x80 ? 1 : 0)));
+	bin.push_back(1 + 1 + r.size() + static_cast<uint64_t>((*(r.begin()) >= 0x80 ? 1 : 0)) + 1 + 1 + s.size() +
+	              static_cast<uint64_t>((*(s.begin()) >= 0x80 ? 1 : 0)));
 
 	bin.push_back(0x02);
 
@@ -68,7 +67,7 @@ void Signature::std_vec_to_der(const std::vector<uint8_t>& vector) {
 	iterator++;
 
 	if (*iterator != 0x02)
-		throw ParsingError(ParsingError::Type::UNEXPECTED_VALUE,  "Invalid DER Signature encoding.");
+		throw ParsingError(ParsingError::Type::UNEXPECTED_VALUE, "Invalid DER Signature encoding.");
 	iterator++;
 
 	uint8_t r_size = *iterator;
@@ -85,7 +84,6 @@ void Signature::std_vec_to_der(const std::vector<uint8_t>& vector) {
 	std::copy(iterator, iterator + r_size, r_var.begin());
 
 	iterator += r_size;
-
 
 	if (*iterator != 0x02)
 		throw ParsingError(ParsingError::Type::UNEXPECTED_VALUE, "Invalid DER Signature encoding.");
@@ -111,7 +109,8 @@ void Signature::std_vec_to_der(const std::vector<uint8_t>& vector) {
 }
 
 std::vector<uint8_t> digest(const std::vector<uint8_t>& message, const std::string& digest_name) {
-	std::unique_ptr<EVP_MD, decltype(&free_digest)> digest_algorithm(EVP_MD_fetch(nullptr, digest_name.c_str(), nullptr), &free_digest);
+	std::unique_ptr<EVP_MD, decltype(&free_digest)> digest_algorithm(
+	    EVP_MD_fetch(nullptr, digest_name.c_str(), nullptr), &free_digest);
 	std::unique_ptr<EVP_MD_CTX, decltype(&free_context)> digest_context(EVP_MD_CTX_new(), &free_context);
 
 	if (digest_algorithm == nullptr) {
@@ -132,7 +131,8 @@ std::vector<uint8_t> digest(const std::vector<uint8_t>& message, const std::stri
 
 	// Process the input batch by batch.
 	while (input_used < message.size()) {
-		EVP_DigestUpdate(digest_context.get(), message.data() + input_used, std::min(batch_size, message.size() - input_used));
+		EVP_DigestUpdate(digest_context.get(), message.data() + input_used,
+		                 std::min(batch_size, message.size() - input_used));
 		input_used += std::min(batch_size, message.size() - input_used);
 	}
 
@@ -142,7 +142,7 @@ std::vector<uint8_t> digest(const std::vector<uint8_t>& message, const std::stri
 	// Finalize the result and set the amount of space used.
 	EVP_DigestFinal_ex(digest_context.get(), (uint8_t*)result.data(), &result_size);
 
-	// Sometimes the space used is actually less than what EVP_MD_CTX_get_size(digest_context.get()) returns, 
+	// Sometimes the space used is actually less than what EVP_MD_CTX_get_size(digest_context.get()) returns,
 	// so we make an adjustment, so it is not taken to be more than what it actually is.
 	result.resize(result_size);
 
@@ -163,9 +163,7 @@ BigPoint::BigPoint(const BigPoint& p) {
 		a = (p.a);
 		b = (p.b);
 		infinity = true;
-	}
-	else
-	{
+	} else {
 		x = (p.x);
 		y = (p.y);
 		a = (p.a);
@@ -183,9 +181,7 @@ BigPoint& BigPoint::operator=(const BigPoint& p) {
 		a = (p.a);
 		b = (p.b);
 		infinity = true;
-	}
-	else
-	{
+	} else {
 		x = (p.x);
 		y = (p.y);
 		a = (p.a);
@@ -272,7 +268,7 @@ std::string BigPoint::uncompressed_sec_to_hex() const {
 	sec_iterator = std::copy(sec_x.begin(), sec_x.end(), sec_iterator);
 
 	auto sec_y = y.number.to_hex();
-	
+
 	counter = 0;
 	while (sec_y.size() + counter < byte_count) {
 		*sec_iterator = '0';
@@ -298,7 +294,7 @@ std::string BigPoint::compressed_sec_to_hex() const {
 
 	*sec_iterator = '0';
 	sec_iterator++;
-	*sec_iterator = ((y.number % 2 == 0) ? '2' : '3'); //Parity indicator.
+	*sec_iterator = ((y.number % 2 == 0) ? '2' : '3'); // Parity indicator.
 	sec_iterator++;
 
 	auto sec_x = x.number.to_hex();
@@ -325,9 +321,8 @@ void BigPoint::uncompressed_sec_from_std_vec(const std::vector<uint8_t>& sec) {
 	std::vector<uint8_t>::const_iterator sec_iterator = sec.cbegin();
 	if (*sec_iterator != 0x04)
 		throw ParsingError(ParsingError::Type::INVALID_DATA);
-		
-	sec_iterator++; // Skip past the prefix.
 
+	sec_iterator++; // Skip past the prefix.
 
 	sec_x_y.first.resize(byte_count);
 	std::copy_n(sec_iterator, byte_count, sec_x_y.first.begin());
@@ -345,12 +340,12 @@ void BigPoint::uncompressed_sec_from_std_vec(const std::vector<uint8_t>& sec) {
 }
 
 void BigPoint::compressed_sec_from_std_vec(std::vector<uint8_t>&& sec) {
-	const uint8_t parity = *(sec.begin()); //Parity.
+	const uint8_t parity = *(sec.begin()); // Parity.
 
 	if (parity != 0x02 && parity != 0x03)
-		throw ParsingError(ParsingError::Type::INVALID_DATA);		
+		throw ParsingError(ParsingError::Type::INVALID_DATA);
 
-	sec.erase(sec.begin()); //Remove the Parity indicator.
+	sec.erase(sec.begin()); // Remove the Parity indicator.
 
 	x = BigFieldElement(sec, a.prime);
 
@@ -359,8 +354,7 @@ void BigPoint::compressed_sec_from_std_vec(std::vector<uint8_t>&& sec) {
 	if (parity == 0x02) {
 		if (y.number % 2 == 1)
 			y.number = y.prime - y.number;
-	}
-	else {
+	} else {
 		if (y.number % 2 == 0)
 			y.number = y.prime - y.number;
 	}
@@ -374,41 +368,35 @@ void BigPoint::compressed_sec_from_std_vec(std::vector<uint8_t>&& sec) {
 void BigPoint::from_std_vec(std::vector<uint8_t>&& sec) {
 	if (sec.size() == 33) { // The compressed public key representation uses only 33 bytes.
 		compressed_sec_from_std_vec(std::move(sec));
-	}
-	else if (sec.size() == 65) { // The uncompressed public key representation uses only 65 bytes.
+	} else if (sec.size() == 65) { // The uncompressed public key representation uses only 65 bytes.
 		uncompressed_sec_from_std_vec(sec);
-	}
-	else {
-		throw ParsingError(ParsingError::Type::INVALID_DATA);		
+	} else {
+		throw ParsingError(ParsingError::Type::INVALID_DATA);
 	}
 }
 
 void BigPoint::from_std_vec(const std::vector<uint8_t>& sec) {
 	if (sec.size() == 33) { // The compressed public key representation uses only 33 bytes.
 		compressed_sec_from_std_vec(std::vector<uint8_t>(sec));
-	}
-	else if (sec.size() == 65) { // The uncompressed public key representation uses only 65 bytes.
+	} else if (sec.size() == 65) { // The uncompressed public key representation uses only 65 bytes.
 		uncompressed_sec_from_std_vec(sec);
-	}
-	else {
-		throw ParsingError(ParsingError::Type::INVALID_DATA);		
+	} else {
+		throw ParsingError(ParsingError::Type::INVALID_DATA);
 	}
 }
 
 void BigPoint::from_std_hex(const std::string& sec) {
 	if (sec.size() == 66) { // The compressed public key representation uses only 33 bytes(66 in hexadecimal).
 		uncompressed_sec_from_hex(sec);
-	}
-	else if (sec.size() == 130) { // The compressed public key representation uses only 65 bytes(130 in hexadecimal).
+	} else if (sec.size() == 130) { // The compressed public key representation uses only 65 bytes(130 in hexadecimal).
 		compressed_sec_from_hex(sec);
-	}
-	else {
-		throw ParsingError(ParsingError::Type::INVALID_DATA);		
+	} else {
+		throw ParsingError(ParsingError::Type::INVALID_DATA);
 	}
 }
 
-
-bool BigPoint::verify(const Signature& sig, const BigNum& group_order, const BigNum& hash, const BigPoint& public_key) const {
+bool BigPoint::verify(const Signature& sig, const BigNum& group_order, const BigNum& hash,
+                      const BigPoint& public_key) const {
 	BigNum s_inverse = sig.s.mod_exp(group_order - 2, group_order);
 
 	BigNum u = (hash * s_inverse) % group_order;

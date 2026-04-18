@@ -260,8 +260,8 @@ int test_x() {
     input_transaction.set_tx_index(0);
     input_transaction.set_script_from_index_and_id(test_transaction.is_testnet()); // Fetch and set the script
 
-    std::cout << "Script pub key: -"; 
-    std::vector<uint8_t> serialization_script; 
+    std::cout << "Script pub key: -";
+    std::vector<uint8_t> serialization_script;
     std::vector<uint8_t>::iterator serialization_script_iterator = serialization_script.begin();
     input_transaction.get_script().serialize(serialization_script, serialization_script_iterator);
     HexDump(serialization_script.begin(), serialization_script.size());
@@ -283,7 +283,8 @@ int test_x() {
     input_serialization.insert(input_serialization.end(), Tx::SIGHASH_ALL.begin(), Tx::SIGHASH_ALL.end());
 
     // Generate a private key
-    PrivateKey private_key_(BigNum("459804aba82fa30ba0491025918d84ca08757054cf1ddc596d24a95d9ed382d2"), Secp256k1_Generator);
+    PrivateKey private_key_(BigNum("459804aba82fa30ba0491025918d84ca08757054cf1ddc596d24a95d9ed382d2"),
+Secp256k1_Generator);
 
     std::cout << "pre-serialized transaction: " << "\n";
     HexDump(input_serialization.begin(), input_serialization.size());    // Hash the serialized transaction
@@ -297,8 +298,8 @@ int test_x() {
 
     // Log key, address and signature.
     std::cout << "Public key: " << private_key_.pubkey.compressed_sec_to_hex() << "\n";
-    std::cout << "Address: " << encode_to_bitcoin_address(private_key_.pubkey.compressed_sec_to_std_vec(), true) << "\n";
-    std::cout << "Signature: ";
+    std::cout << "Address: " << encode_to_bitcoin_address(private_key_.pubkey.compressed_sec_to_std_vec(), true) <<
+"\n"; std::cout << "Signature: ";
 
     std::cout << "Primitive hash:- " << std::endl;
     HexDump(hash.begin(), hash.size());
@@ -345,13 +346,15 @@ int test_x() {
 int test_a(){
     Tx transaction;
 
-    std::vector<uint8_t> serialization = hex_to_std_vec("01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff1b03951a0604f15ccf5609013803062b9b5a0100072f425443432f200000000001ebc31495000000001976a9142c30a6aaac6d96687291475d7d52f4b469f665a688ac00000000");
+    std::vector<uint8_t> serialization =
+hex_to_std_vec("01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff1b03951a0604f15ccf5609013803062b9b5a0100072f425443432f200000000001ebc31495000000001976a9142c30a6aaac6d96687291475d7d52f4b469f665a688ac00000000");
 
     std::vector<uint8_t>::iterator iterator = serialization.begin();
 
     transaction.parse(iterator);
 
-    std::cout << "Coinbase transaction: " << (transaction.is_coinbase() ? "True" : "False") << "\n" << "\n" << std::endl;
+    std::cout << "Coinbase transaction: " << (transaction.is_coinbase() ? "True" : "False") << "\n" << "\n" <<
+std::endl;
 
     auto block_height = transaction.extract_coinbase_block_height();
 
@@ -375,7 +378,9 @@ int test_a(){
 
 int block_test() {
     // Block serialization (example block from Bitcoin mainnet)
-    std::string block_hex = "0100000050120119172a610421a6c3011dd330d9df07b63616c2cc1f1cd00200000000006657a9252aacd5c0b2940996ecff952228c3067cc38d4885efb5a4ac4247e9f337221b4d4c86041b0f2b5710"; // Nonce
+    std::string block_hex =
+"0100000050120119172a610421a6c3011dd330d9df07b63616c2cc1f1cd00200000000006657a9252aacd5c0b2940996ecff952228c3067cc38d4885efb5a4ac4247e9f337221b4d4c86041b0f2b5710";
+// Nonce
 
     // Convert hex to vector<uint8_t>
     std::vector<uint8_t> block_serialization = hex_to_std_vec(block_hex);
@@ -438,12 +443,15 @@ int block_test() {
         std::cout << "Target-to-Bits conversion is incorrect!" << std::endl;
     }
 
-    std::vector<uint8_t> first = hex_to_std_vec("000000203471101bbda3fe307664b3283a9ef0e97d9a38a7eacd8800000000000000000010c8aba8479bbaa5e0848152fd3c2289ca50e1c3e58c9a4faaafbdf5803c5448ddb845597e8b0118e43a81d3");
+    std::vector<uint8_t> first =
+hex_to_std_vec("000000203471101bbda3fe307664b3283a9ef0e97d9a38a7eacd8800000000000000000010c8aba8479bbaa5e0848152fd3c2289ca50e1c3e58c9a4faaafbdf5803c5448ddb845597e8b0118e43a81d3");
     std::vector<uint8_t>::iterator first_iter = first.begin();
-    std::vector<uint8_t> last = hex_to_std_vec("02000020f1472d9db4b563c35f97c428ac903f23b7fc055d1cfc26000000000000000000b3f449fcbe1bc4cfbcb8283a0d2c037f961a3fdf2b8bedc144973735eea707e1264258597e8b0118e5f00474");
+    std::vector<uint8_t> last =
+hex_to_std_vec("02000020f1472d9db4b563c35f97c428ac903f23b7fc055d1cfc26000000000000000000b3f449fcbe1bc4cfbcb8283a0d2c037f961a3fdf2b8bedc144973735eea707e1264258597e8b0118e5f00474");
     std::vector<uint8_t>::iterator last_iter = last.begin();
 
-    std::vector<uint8_t> next = hex_to_std_vec("0200002099d6a70c547bbaa1a820490bd02cc378d3bc6e20469438010000000000000000b66a0b024cfdf07d0dd97e18ad6ef1a411b0452129d3bfe3e6ebae55defec4dd95425859308d0118bc260a08");
+    std::vector<uint8_t> next =
+hex_to_std_vec("0200002099d6a70c547bbaa1a820490bd02cc378d3bc6e20469438010000000000000000b66a0b024cfdf07d0dd97e18ad6ef1a411b0452129d3bfe3e6ebae55defec4dd95425859308d0118bc260a08");
     std::vector<uint8_t>::iterator next_iter = next.begin();
 
     Block first_block = Block(first_iter);
@@ -587,7 +595,7 @@ a8da127a7dbdd425a05e25f688ac00000000";
 
     std::cout << "======================================" << std::endl;
 
-    
+
 
     if(tx.is_valid()){
         std::cout << "Transaction is valid." << std::endl;
@@ -649,7 +657,7 @@ void test_p2wpkh_transaction() {
 
     std::cout << "======================================" << std::endl;
 
-    
+
 
     if(tx.is_valid()){
         std::cout << "Transaction is valid." << std::endl;
@@ -707,7 +715,7 @@ void test_p2wsh_transaction() {
 
     std::cout << "======================================" << std::endl;
 
-    
+
 
     if(tx.is_valid()){
         std::cout << "Transaction is valid." << std::endl;
@@ -771,7 +779,7 @@ e53d70eff01874496feff2103c96d495bfdd5ba4145e3e046fee45e84a8a48ad05bd8dbb395c011a
 
     std::cout << "======================================" << std::endl;
 
-    
+
 
     if(tx.is_valid()){
         std::cout << "Transaction is valid." << std::endl;
@@ -831,7 +839,7 @@ void test_p2sh_p2wkh_transaction() {
 
     std::cout << "======================================" << std::endl;
 
-    
+
 
     if(tx.is_valid()){
         std::cout << "Transaction is valid." << std::endl;
@@ -894,7 +902,7 @@ c0480eccc7141460dccc03000000232200207399bb69ad56fa38b607ea8e1d9cd0039d9572f7a1da
 
     std::cout << "======================================" << std::endl;
 
-    
+
 
     if(tx.is_valid()){
         std::cout << "Transaction is valid." << std::endl;

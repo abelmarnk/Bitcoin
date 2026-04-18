@@ -1,18 +1,17 @@
-#include <algorithm>
-#include <vector>
-#include <iostream>
 #include "Compute.h"
 #include "../Error/Error.h"
 #include "../Serial/Serial.h"
 
-BigNum::ContextType BigNum::context() const{
+BigNum::ContextType BigNum::context() const {
 	static std::shared_ptr<BN_CTX> context(BN_CTX_new(), &BigNum::free_big_number_context);
 	return context;
 }
 
-BigNum::BigNum(const std::string& number) :number(nullptr, &free_big_number) {
+BigNum::BigNum(const std::string& number) : number(nullptr, &free_big_number) {
 	if (number.size() == 0)
-		throw ArithmeticError(ArithmeticError::Type::NUMBER_IS_NULL, "An  std::string of size zero cannot be used for initialization, use the default constructor instead.");
+		throw ArithmeticError(
+		    ArithmeticError::Type::NUMBER_IS_NULL,
+		    "An  std::string of size zero cannot be used for initialization, use the default constructor instead.");
 
 	BIGNUM* BigNumber = BN_new();
 
@@ -23,20 +22,23 @@ BigNum::BigNum(const std::string& number) :number(nullptr, &free_big_number) {
 	this->number = std::move(NumberType(BigNumber, &free_big_number));
 }
 
-BigNum::BigNum(NumberType number) :number(nullptr, &free_big_number) {
+BigNum::BigNum(NumberType number) : number(nullptr, &free_big_number) {
 	if (number.get() == nullptr)
-		throw ArithmeticError(ArithmeticError::Type::NUMBER_IS_NULL, "A null value cannot be used for initialization, use the default constructor instead.");
+		throw ArithmeticError(ArithmeticError::Type::NUMBER_IS_NULL,
+		                      "A null value cannot be used for initialization, use the default constructor instead.");
 
 	this->number = std::move(NumberType(BN_dup(number.get()), &free_big_number));
 }
 
-BigNum::BigNum(const std::vector<uint8_t>& number) :number(nullptr, &free_big_number) {
+BigNum::BigNum(const std::vector<uint8_t>& number) : number(nullptr, &free_big_number) {
 	if (number.size() == 0)
-		throw ArithmeticError(ArithmeticError::Type::NUMBER_IS_NULL, "An std::vector of size zero cannot be used for initialization, use the default constructor instead.");
+		throw ArithmeticError(
+		    ArithmeticError::Type::NUMBER_IS_NULL,
+		    "An std::vector of size zero cannot be used for initialization, use the default constructor instead.");
 
-	this->number = std::move(NumberType(BN_bin2bn(number.data(), static_cast<int32_t>(number.size()), nullptr), &free_big_number));
+	this->number =
+	    std::move(NumberType(BN_bin2bn(number.data(), static_cast<int32_t>(number.size()), nullptr), &free_big_number));
 }
-
 
 std::vector<uint8_t> BigNum::to_std_vec() const {
 	std::vector<uint8_t> bignum(BN_num_bytes(this->number.get()));
@@ -74,7 +76,7 @@ std::vector<uint8_t> BigNum::to_std_vec_64() const {
 }
 
 std::string BigNum::to_hex() const {
-	
+
 	// IMPORTANT: Openssl does not store leading zeros, so if it was initially set from a string with leading zeros
 	// by the time it is making this conversion back the leading zeros would have been removed, this previously caused
 	// some debugging issues, so i mention it here.
@@ -103,7 +105,6 @@ std::string BigNum::to_dec() const {
 	return result;
 }
 
-
 BigNum::NumberType BigNum::mod_mul(BIGNUM* first, BIGNUM* second, BIGNUM* modulus) const {
 	if (BN_is_zero(modulus) == 1)
 		throw ArithmeticError(ArithmeticError::Type::DIVISION_BY_ZERO); // Try to catch divsion by zero before openssl.
@@ -126,7 +127,7 @@ BigNum::NumberType BigNum::mod_exp(BIGNUM* base, BIGNUM* exponent, BIGNUM* modul
 }
 
 BigNum::NumberType BigNum::exp(BIGNUM* first, BIGNUM* second) const {
-		
+
 	NumberType result(BN_new(), &free_big_number);
 	BN_exp(result.get(), first, second, context().get());
 
