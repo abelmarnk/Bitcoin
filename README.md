@@ -1,51 +1,89 @@
-This project is a personal exploration of the internals of Bitcoin. It is not a full node or wallet, but attempts to implements Bitcoin concepts, like transaction parsing, serialization, validation, and basic network interaction.
+# Bitcoin C++ Project
 
+This is a C++23 reimplementation of the concepts from Jimmy Song's *Programming Bitcoin*. It is a study project, not a production Bitcoin node or wallet.
 
-What it does
-Transaction Parsing and Serialization:
-Parses and serializes Bitcoin transactions, providing insight into the structure and encoding of Bitcoin data.
-Transaction Validation:
-Implements basic transaction validation logic.
-Note: This does not include checking whether transaction inputs have already been spent (no UTXO set or mempool).
-Script Evaluation:
-Includes a partial implementation of Bitcoin Script, supporting common script types such as P2PKH, P2SH, P2WPKH, and P2WSH.
+## Current State
 
-The code draws heavily from Jimmy Song’s Programming Bitcoin and https://learnmeabitcoin.com/
-What it doesn't do
-No UTXO Set or Double-Spend Checking:
-Does not track spent outputs or prevent double-spending.
-Not a Full Node:
-Does not relay blocks or transactions, manage peers, or maintain a blockchain.
-Partial Script Engine:
-Script evaluation is simplified and does not cover all edge cases or opcodes.
-Consensus Rules:
-Some transactions may be marked as valid even if they would be rejected by a full node. They are pointed out in the code.
-No Full Network Support:
-Only the handshake is implemented; no block or transaction relay, peer management, or full protocol support.
-No Wallet Functionality:
-Does not generate addresses, manage keys, or sign transactions.
-No GUI or RPC:
-Command-line only, no user interface or remote procedure call support.
+The project currently does the following:
 
-Dependencies
-C++23 or later
-Boost (system, filesystem, thread, chrono)
-OpenSSL
-nlohmann_json
-Catch2 (included as amalgamated header and compiled source)
-All dependencies are managed with CMake.
+- Parses, serializes, and reserializes Bitcoin transactions.
+- Implements transaction validation for the examples covered by the book.
+- Evaluates common Bitcoin Script patterns, including P2PKH, P2SH, P2WPKH, and P2WSH.
+- Computes hashes, digests, Merkle roots, and Merkle proofs.
+- Implements Bloom filters for BIP37-style SPV use cases.
+- Handles block parsing and proof-of-work checks.
+- Includes basic network interaction for transaction lookups and peer handshake tests.
+- Ships with a Catch2-based test suite that covers the book-driven examples.
 
-Building
-Clone the repository and ensure all dependencies are available on your system.
-Edit the CMakeLists.txt file:
-Update the paths for catch_amalgamated.cpp, nlohmann_json, and catch_2 to match your local setup.
-Build with CMake:
-Run Tests.
+## What It Does Not Do
 
-Possible additions
+This project does not try to be a full Bitcoin implementation. In particular, it does not:
 
-Implementing a UTXO set and double-spend checking.
-Expanding the script engine to cover all standard opcodes and edge cases.
-Adding full network support (block/transaction relay, peer discovery, etc).
-Making validation logic fully conformant to Bitcoin consensus rules.
-Adding more comprehensive tests.
+- Maintain a UTXO set or mempool.
+- Relay blocks or transactions as a full P2P node.
+- Perform peer discovery or maintain long-lived network state.
+- Provide wallet features, address management, or key storage.
+- Expose a GUI or RPC server.
+- Aim for full consensus coverage.
+- Guarantee network-dependent tests will pass offline; those tests contact external services and can time out if the network is unavailable.
+
+## Requirements
+
+- CMake 3.28 or newer
+- A C++23 compiler (g++ 13 or clang++ 17 or newer)
+- Boost (headers + `system`, `filesystem`, `thread`, `chrono`, `asio`, `beast`)
+- OpenSSL
+- Catch2 3
+- nlohmann_json
+
+On Ubuntu / Debian:
+
+```bash
+sudo apt-get install -y \
+    cmake build-essential \
+    libboost-all-dev \
+    libssl-dev \
+    nlohmann-json3-dev \
+    catch2
+```
+
+## Build
+
+From the repository root:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
+
+The Debug build is configured with AddressSanitizer, so it is the best mode for development and test runs.
+
+## Run the Tests
+
+The test binary is created at `build/BitcoinCpp_Tests`.
+
+### List available tests
+
+```bash
+./build/BitcoinCpp_Tests --list-tests
+```
+
+### Run the offline suite
+
+This excludes the network-dependent tests and is the quickest way to verify the project:
+
+```bash
+./build/BitcoinCpp_Tests "~[network]" --reporter compact
+```
+
+### Run only the network tests
+
+```bash
+./build/BitcoinCpp_Tests "[network]" --reporter compact
+```
+
+### Run the full suite
+
+```bash
+./build/BitcoinCpp_Tests --reporter compact
+```
