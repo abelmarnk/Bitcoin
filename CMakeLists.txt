@@ -14,6 +14,8 @@ find_package(Boost REQUIRED COMPONENTS
 )
 
 find_package(OpenSSL REQUIRED)
+find_package(Catch2 3 REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 
 set(APP_SOURCES
@@ -25,6 +27,7 @@ set(APP_SOURCES
     src/Varint/Varint.cpp
     src/Block/Block.cpp
     src/Network/Network.cpp
+    src/Murmur/Murmur.cpp
     "src/Debug functions/Debug functions.cpp"
 )
 
@@ -37,6 +40,7 @@ set(APP_HEADERS
     src/Varint/Varint.h
     src/Block/Block.h
     src/Network/Network.h
+    src/Murmur/Murmur.h
     "src/Debug functions/Debug functions.h"
 )
 
@@ -50,7 +54,6 @@ set(TEST_SOURCES
     "tests/block.cpp"
     "tests/serial.cpp"
     "tests/network.cpp"
-    "/path_to_catch_amalgamated.cpp"
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -65,13 +68,9 @@ add_executable(BitcoinCpp_Tests ${APP_SOURCES} ${TEST_SOURCES}  ${APP_HEADERS})
 
 target_include_directories(BitcoinCpp_Tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/
-    /path_to_nhollmann_json/
-    /path_to_catch_2/
     ${Boost_INCLUDE_DIRS}
 )
 
-
-target_compile_definitions(BitcoinCpp_Tests PRIVATE CATCH_CONFIG_MAIN)
 
 target_link_libraries(BitcoinCpp_Tests
     PRIVATE
@@ -80,6 +79,8 @@ target_link_libraries(BitcoinCpp_Tests
         Boost::thread
         OpenSSL::SSL
         OpenSSL::Crypto
+        Catch2::Catch2WithMain
+        nlohmann_json::nlohmann_json
 )
 
 enable_testing()

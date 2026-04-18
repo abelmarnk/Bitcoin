@@ -1,7 +1,6 @@
 #include "../Debug functions/Debug functions.h"
 #include "Transaction.h"
 #include "../Serial/Serial.h"
-#include <iostream>
 
 TxIn& TxIn::operator=(const TxIn& input_tx) {
 	tx_id = input_tx.tx_id;
@@ -19,8 +18,7 @@ TxIn& TxIn::operator=(TxIn&& input_tx) {
 	return *this;
 }
 
-
-void TxIn::parse(std::vector<uint8_t>::const_iterator &&start) {
+void TxIn::parse(std::vector<uint8_t>::const_iterator&& start) {
 	// The bytes in "start" are expected to be in little endian.
 
 	// Read the transation id and advance the iterator.
@@ -37,13 +35,14 @@ void TxIn::parse(std::vector<uint8_t>::const_iterator &&start) {
 	read_int_from_little_endian_bytes(std::forward<std::vector<uint8_t>::const_iterator>(start), sequence);
 }
 
-void TxIn::serialize(std::vector<uint8_t>::iterator& start, std::vector<uint8_t>& input, bool should_adjust_iterator) const {
+void TxIn::serialize(std::vector<uint8_t>::iterator& start, std::vector<uint8_t>& input,
+                     bool should_adjust_iterator) const {
 	// The bytes are serialized in little endian order.
 
 	// Make space if necessary.
-	if(should_adjust_iterator){
-		adjust_bytes(start, input, get_legacy_size()); // We always serialize the transaction separate from it's witness data so 
-													   // can call get_legacy_size safely here.
+	if (should_adjust_iterator) {
+		adjust_bytes(start, input, get_legacy_size()); // We always serialize the transaction separate from it's witness
+		                                               // data so can call get_legacy_size safely here.
 	}
 
 	// Write the transaction id and advance the iterator.
@@ -59,20 +58,21 @@ void TxIn::serialize(std::vector<uint8_t>::iterator& start, std::vector<uint8_t>
 	write_int_as_little_endian_bytes(sequence, start, input);
 }
 
-void TxIn::set_script_from_index_and_id(bool is_testnet){
+void TxIn::set_script_from_index_and_id(bool is_testnet) {
 	// Fetch the script pubkey.
-	std::vector<uint8_t> script_pubkey = hex_to_std_vec(TxInfoFetcher::fetch_script_pubkey(std_array_to_hex(get_tx_id()), get_tx_index(), is_testnet));
+	std::vector<uint8_t> script_pubkey =
+	    hex_to_std_vec(TxInfoFetcher::fetch_script_pubkey(std_array_to_hex(get_tx_id()), get_tx_index(), is_testnet));
 
 	set_script(std::move(Script(script_pubkey.cbegin(), script_pubkey.size())));
 }
 
 void TxIn::set_script_from_index_and_id(const std::array<uint8_t, 32>& tx_id, uint32_t tx_index, bool is_testnet) {
 	// Fetch the script pubkey.
-	std::vector<uint8_t> script_pubkey = hex_to_std_vec(TxInfoFetcher::fetch_script_pubkey(std_array_to_hex(tx_id), tx_index, is_testnet));
+	std::vector<uint8_t> script_pubkey =
+	    hex_to_std_vec(TxInfoFetcher::fetch_script_pubkey(std_array_to_hex(tx_id), tx_index, is_testnet));
 
 	set_script(std::move(Script(script_pubkey.cbegin(), script_pubkey.size())));
 }
-
 
 TxOut& TxOut::operator=(const TxOut& MyOutput) {
 	amount = MyOutput.amount;
@@ -86,34 +86,33 @@ TxOut& TxOut::operator=(TxOut&& MyOutput) {
 	return *this;
 }
 
-
-void TxOut::parse(std::vector<uint8_t>::const_iterator&&start) {
+void TxOut::parse(std::vector<uint8_t>::const_iterator&& start) {
 	// The bytes are expected to be in little endian order.
 
 	// Read the amount and advance the iterator.
-	read_int_from_little_endian_bytes(std::forward<std::vector<uint8_t>::const_iterator>(start), amount); 
+	read_int_from_little_endian_bytes(std::forward<std::vector<uint8_t>::const_iterator>(start), amount);
 
 	// Read the script pubkey and advance the iterator.
-	script_pubkey.parse(std::forward<std::vector<uint8_t>::const_iterator>(start)); 
+	script_pubkey.parse(std::forward<std::vector<uint8_t>::const_iterator>(start));
 }
 
-void TxOut::serialize(std::vector<uint8_t>::iterator& start, std::vector<uint8_t>& input, bool should_adjust_iterator) const {
+void TxOut::serialize(std::vector<uint8_t>::iterator& start, std::vector<uint8_t>& input,
+                      bool should_adjust_iterator) const {
 	// The bytes are serialized in little endian order.
 
 	// Make space if necessary.
-	if(should_adjust_iterator) {
+	if (should_adjust_iterator) {
 		adjust_bytes(start, input, get_size());
 	}
 
 	// Write the amount and advance the iterator.
-	write_int_as_little_endian_bytes(amount, start, input); 
+	write_int_as_little_endian_bytes(amount, start, input);
 
 	// Write the script pubkey and advance the iterator.
 	script_pubkey.serialize(input, start, false);
 }
 // This program only supports the sighash_all  type.
-const std::array<uint8_t, 4> Tx::SIGHASH_ALL{ 0x01,0x00,0x00,0x00 };
-
+const std::array<uint8_t, 4> Tx::SIGHASH_ALL{0x01, 0x00, 0x00, 0x00};
 
 Tx& Tx::operator=(const Tx& my_tx) {
 	version = my_tx.version;
@@ -133,12 +132,11 @@ Tx& Tx::operator=(Tx&& my_tx) noexcept {
 	return *this;
 }
 
-void Tx::parse(std::vector<uint8_t>::const_iterator&& input){
+void Tx::parse(std::vector<uint8_t>::const_iterator&& input) {
 	// Check for segwit marker.
-	if(*(input + 4) == 0x00){ 
+	if (*(input + 4) == 0x00) {
 		parse_segwit(std::forward<std::vector<uint8_t>::const_iterator>(input));
-	}
-	else {
+	} else {
 		parse_legacy(std::forward<std::vector<uint8_t>::const_iterator>(input));
 	}
 }
@@ -150,16 +148,16 @@ void Tx::parse_legacy(std::vector<uint8_t>::const_iterator&& start) {
 	read_int_from_little_endian_bytes(std::forward<std::vector<uint8_t>::const_iterator>(start), version);
 
 	// Read the input size and advance the iterator.
-	size_t InputSize = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start)); 
-	
+	size_t InputSize = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start));
+
 	while (InputSize > 0) {
 		// Read the inputs and advance the iterator.
-		input_txs.push_back(TxIn(std::forward<std::vector<uint8_t>::const_iterator>(start))); 
+		input_txs.push_back(TxIn(std::forward<std::vector<uint8_t>::const_iterator>(start)));
 		InputSize--;
 	}
 
 	// Read the output size and advance the iterator.
-	size_t OutputSize = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start)); 
+	size_t OutputSize = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start));
 
 	while (OutputSize > 0) {
 		// Read the outputs and advance the iterator.
@@ -181,17 +179,19 @@ void Tx::parse_segwit(std::vector<uint8_t>::const_iterator&& start) {
 	start += 2; // Skip the segwit marker and flag bytes.
 
 	// Read the input size and advance the iterator.
-	size_t InputSize = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start)); // The call to get_unsigned_small is valid as a variant is always less than
-																// std::numeric_limits<uint64_t>::max().
+	size_t InputSize = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(
+	    start)); // The call to get_unsigned_small is valid as a variant is always less than
+	             // std::numeric_limits<uint64_t>::max().
 	while (InputSize > 0) {
 		// Read the inputs and advance the iterator.
-		input_txs.push_back(TxIn(std::forward<std::vector<uint8_t>::const_iterator>(start))); 
+		input_txs.push_back(TxIn(std::forward<std::vector<uint8_t>::const_iterator>(start)));
 		InputSize--;
 	}
 
 	// Read the output size and advance the iterator.
-	size_t OutputSize = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start)); // The call to get_unsigned_small is valid as a variant is always less than
-																// std::numeric_limits<uint64_t>::max().
+	size_t OutputSize = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(
+	    start)); // The call to get_unsigned_small is valid as a variant is always less than
+	             // std::numeric_limits<uint64_t>::max().
 	while (OutputSize > 0) {
 		// Read the outputs and advance the iterator.
 		output_txs.push_back(TxOut(std::forward<std::vector<uint8_t>::const_iterator>(start)));
@@ -200,15 +200,18 @@ void Tx::parse_segwit(std::vector<uint8_t>::const_iterator&& start) {
 
 	// Read the witness data for each input.
 	for (auto& input_tx : input_txs) {
-		size_t witness_count = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start)); // Get the number of witness items.
+		size_t witness_count =
+		    parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start)); // Get the number of witness items.
 
 		for (size_t i = 0; i < witness_count; ++i) {
-			size_t witness_size = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(start)); // Get the size of each witness item.
+			size_t witness_size = parse_varint(
+			    std::forward<std::vector<uint8_t>::const_iterator>(start)); // Get the size of each witness item.
 			std::vector<uint8_t> witness_data(witness_size);
 			std::copy_n(start, witness_size, witness_data.begin());
 			start += witness_size;
-			input_tx.get_witness_data().push_back(std::move(witness_data)); // Add the witness data to the input transaction.
-		}				
+			input_tx.get_witness_data().push_back(
+			    std::move(witness_data)); // Add the witness data to the input transaction.
+		}
 	}
 
 	// Read the locktime and advance the iterator.
@@ -217,32 +220,34 @@ void Tx::parse_segwit(std::vector<uint8_t>::const_iterator&& start) {
 	testnet = false;
 }
 
-void Tx::serialize(std::vector<uint8_t>& input, std::vector<uint8_t>::iterator& start, bool should_adjust_iterator) const {
+void Tx::serialize(std::vector<uint8_t>& input, std::vector<uint8_t>::iterator& start,
+                   bool should_adjust_iterator) const {
 
-	if(is_segwit()) {
+	if (is_segwit()) {
 		serialize_segwit(input, start, should_adjust_iterator);
-	} 
-	else{
+	} else {
 
 		serialize_legacy(input, start, should_adjust_iterator);
 	}
 }
 
-void Tx::serialize_legacy(std::vector<uint8_t>& input, std::vector<uint8_t>::iterator& start, bool should_adjust_iterator) const {
+void Tx::serialize_legacy(std::vector<uint8_t>& input, std::vector<uint8_t>::iterator& start,
+                          bool should_adjust_iterator) const {
 
-	if(should_adjust_iterator) {
+	if (should_adjust_iterator) {
 		adjust_bytes(start, input, get_legacy_size());
- 	}
-	
+	}
+
 	write_int_as_little_endian_bytes(version, start, input); // Write the version and advance the iterator.
 
-	serialize_varint(input_txs.size(), start, input, false); // Write a varint(Number of Tx inputs) and advance the iterator.
+	serialize_varint(input_txs.size(), start, input,
+	                 false); // Write a varint(Number of Tx inputs) and advance the iterator.
 
 	// Write the inputs and advance the iterator.
 	auto Iterator = input_txs.begin();
 
 	while (Iterator != input_txs.end()) {
-		Iterator->serialize(start, input, false); 
+		Iterator->serialize(start, input, false);
 		Iterator++;
 	}
 
@@ -252,34 +257,36 @@ void Tx::serialize_legacy(std::vector<uint8_t>& input, std::vector<uint8_t>::ite
 	auto OutputIterator = output_txs.begin();
 
 	while (OutputIterator != output_txs.end()) {
-		OutputIterator->serialize(start, input, false); 
+		OutputIterator->serialize(start, input, false);
 		OutputIterator++;
 	}
 
 	// Write the version and advance the iterator.
-	write_int_as_little_endian_bytes(locktime, start, input); 
+	write_int_as_little_endian_bytes(locktime, start, input);
 }
 
-void Tx::serialize_segwit(std::vector<uint8_t>& input, std::vector<uint8_t>::iterator& start, bool should_adjust_iterator) const {
+void Tx::serialize_segwit(std::vector<uint8_t>& input, std::vector<uint8_t>::iterator& start,
+                          bool should_adjust_iterator) const {
 
-	if(should_adjust_iterator) {
+	if (should_adjust_iterator) {
 		adjust_bytes(start, input, get_segwit_size());
- 	}
-	
+	}
+
 	write_int_as_little_endian_bytes(version, start, input); // Write the version and advance the iterator.
 
 	*start = 0x00; // Insert the segwit marker.
-	start++; // Advance the iterator.
+	start++;       // Advance the iterator.
 	*start = 0x01; // Insert the segwit flag.
-	start++; // Advance the iterator.
+	start++;       // Advance the iterator.
 
-	serialize_varint(input_txs.size(), start, input, false); // Write a varint(Number of Tx inputs) and advance the iterator.
+	serialize_varint(input_txs.size(), start, input,
+	                 false); // Write a varint(Number of Tx inputs) and advance the iterator.
 
 	// Write the inputs and advance the iterator.
 	auto Iterator = input_txs.begin();
 
 	while (Iterator != input_txs.end()) {
-		Iterator->serialize(start, input, false); 
+		Iterator->serialize(start, input, false);
 		Iterator++;
 	}
 
@@ -289,25 +296,21 @@ void Tx::serialize_segwit(std::vector<uint8_t>& input, std::vector<uint8_t>::ite
 	auto OutputIterator = output_txs.begin();
 
 	while (OutputIterator != output_txs.end()) {
-		OutputIterator->serialize(start, input, false); 
+		OutputIterator->serialize(start, input, false);
 		OutputIterator++;
 	}
 
 	// Write the witness data for each input.
-	 for (auto& input_tx : input_txs) {
-			std::vector<uint8_t> WitnessData;
-			std::vector<uint8_t>::iterator WitnessDataIterator = WitnessData.begin();
+	for (auto& input_tx : input_txs) {
+		serialize_varint(input_tx.get_witness_data().size(), start, input, false);
 
-			serialize_varint(input_tx.get_witness_data().size(), start, input, false); // Write a number of witness data and advance the iterator.
+		for (const auto& witness : input_tx.get_witness_data()) {
+			start = std::copy(witness.begin(), witness.end(), start);
+		}
 
-			for (const auto& witness : input_tx.get_witness_data()) {
-				start = std::copy(witness.begin(), witness.end(), start); // Write the witness data.
-			}
+		// Write the version and advance the iterator.
+		write_int_as_little_endian_bytes(locktime, start, input);
 	}
-
-	// Write the version and advance the iterator.
-	write_int_as_little_endian_bytes(locktime, start, input); 
-
 }
 
 int64_t Tx::get_output_sum() const {
@@ -333,19 +336,19 @@ std::vector<uint8_t> Tx::get_transaction_hash(uint64_t index, Script& script) {
 	// This is a private function so it shouldn't have a wrong index.
 
 	std::vector<Script> old_scripts;
-	
+
 	for (auto& InputTransaction : input_txs) { // Move the old scripts.
 		old_scripts.push_back(std::move(InputTransaction.get_script()));
 		InputTransaction.get_script().clear();
 	}
 
-	// Set the script to be replaced with, in the case of p2pkh it is the script pubkey, 
+	// Set the script to be replaced with, in the case of p2pkh it is the script pubkey,
 	// in the case of p2sh it is the redeem script.
 	input_txs[index].set_script(std::move(script));
 
 	// Serialize the transaction using the legacy method.
-	std::vector<uint8_t> tx_serialization(get_legacy_size() + sizeof(SIGHASH_ALL));// Transaction serialization size + 
-														  //  type size
+	std::vector<uint8_t> tx_serialization(get_legacy_size() + sizeof(SIGHASH_ALL)); // Transaction serialization size +
+	                                                                                //  type size
 	std::vector<uint8_t>::iterator tx_serialization_iterator = tx_serialization.begin();
 
 	serialize_legacy(tx_serialization, tx_serialization_iterator, false);
@@ -362,19 +365,16 @@ std::vector<uint8_t> Tx::get_transaction_hash(uint64_t index, Script& script) {
 	return DigestStream<HASH256_tag>::digest(tx_serialization);
 }
 
-std::vector<uint8_t> Tx::get_bip143_transaction_hash(uint64_t input_index, std::vector<uint8_t>& script_code, int64_t script_size) {
+std::vector<uint8_t> Tx::get_bip143_transaction_hash(uint64_t input_index, std::vector<uint8_t>& script_code,
+                                                     int64_t script_size) {
 	// Serialize the data for BIP143  hash.
-	uint32_t size = sizeof(version) + 
-	sizeof(inputs_hash) +
-		sizeof(sequence_hash) + 
-	32 + 4 + // Size of the transaction id and transaction index we are signing.
-	(script_size == -1 ? 0 : get_varint_byte_size(script_size)) + script_code.size() + 
-	8 + // Size of the input amount.
-	4 + // Size of the input sequence.
-	sizeof(outputs_hash) +
-	4 + // Size of the locktime.
-	4; // Size of the  type.
-
+	uint32_t size = sizeof(version) + sizeof(inputs_hash) + sizeof(sequence_hash) + 32 +
+	                4 + // Size of the transaction id and transaction index we are signing.
+	                (script_size == -1 ? 0 : get_varint_byte_size(script_size)) + script_code.size() +
+	                8 +                        // Size of the input amount.
+	                4 +                        // Size of the input sequence.
+	                sizeof(outputs_hash) + 4 + // Size of the locktime.
+	                4;                         // Size of the  type.
 
 	std::vector<uint8_t> serialization(size);
 	auto serialization_iterator = serialization.begin();
@@ -392,20 +392,19 @@ std::vector<uint8_t> Tx::get_bip143_transaction_hash(uint64_t input_index, std::
 
 	// Write outpoint (txid + index) of the input being signed.
 	const auto& tx_in = input_txs[input_index];
-	serialization_iterator = std::copy(tx_in.get_tx_id().cbegin(), 
-	tx_in.get_tx_id().cend(), serialization_iterator);
+	serialization_iterator = std::copy(tx_in.get_tx_id().cbegin(), tx_in.get_tx_id().cend(), serialization_iterator);
 	write_int_as_little_endian_bytes(tx_in.get_tx_index(), serialization_iterator, serialization);
 
 	// Write the script code for the input with index "input_index".
-	if(script_size != -1){
+	if (script_size != -1) {
 		serialize_varint(script_size, serialization_iterator, serialization, false);
 	}
 
 	serialization_iterator = std::copy(script_code.cbegin(), script_code.cend(), serialization_iterator);
 
 	// Write the amount for the input with index "input_index".
-	uint64_t amount = TxInfoFetcher::fetch_output_amount(std_array_to_hex(input_txs[input_index].
-										get_tx_id()), input_txs[input_index].get_tx_index(), testnet);
+	uint64_t amount = TxInfoFetcher::fetch_output_amount(std_array_to_hex(input_txs[input_index].get_tx_id()),
+	                                                     input_txs[input_index].get_tx_index(), testnet);
 	write_int_as_little_endian_bytes(amount, serialization_iterator, serialization);
 
 	// Write the sequence for the input with index "input_index".
@@ -425,35 +424,31 @@ std::vector<uint8_t> Tx::get_bip143_transaction_hash(uint64_t input_index, std::
 	return get_hash_256(serialization);
 }
 
-
-
-
 // Get the hash of inputs required for the segwit hash.
 std::array<uint8_t, 32>& Tx::hash_inputs() {
-// Serialize all previous transaction outputs and sequences.
+	// Serialize all previous transaction outputs and sequences.
 
-	bool is_empty = std::all_of(inputs_hash.begin(), inputs_hash.end(),
-		[](uint8_t byte) { return byte == 0; });
+	bool is_empty = std::all_of(inputs_hash.begin(), inputs_hash.end(), [](uint8_t byte) { return byte == 0; });
 
-	if(is_empty){
-				DigestStream<HASH256_tag> digestor;
+	if (is_empty) {
+		DigestStream<HASH256_tag> digestor;
 
 		std::vector<uint8_t> all_inputs((32 + 4));
 		auto all_ins_iterator = all_inputs.begin();
-		
+
 		for (const auto& tx_in : input_txs) {
 			// Serialize previous transaction ID and index.
 			all_ins_iterator = std::copy(tx_in.get_tx_id().begin(), tx_in.get_tx_id().end(), all_ins_iterator);
-			
+
 			write_int_as_little_endian_bytes(tx_in.get_tx_index(), all_ins_iterator, all_inputs);
 
 			digestor.update(all_inputs);
 
 			all_ins_iterator = all_inputs.begin();
 		}
-		
+
 		// Compute the hash of all inputs.
-		
+
 		auto hash = digestor.finalize();
 
 		std::copy(hash.begin(), hash.end(), inputs_hash.begin());
@@ -465,8 +460,7 @@ std::array<uint8_t, 32>& Tx::hash_inputs() {
 // Get the hash of all the input sequences required for the segwit hash.
 std::array<uint8_t, 32>& Tx::hash_sequence() {
 	// Serialize all input sequences.
-	bool is_empty = std::all_of(sequence_hash.begin(), sequence_hash.end(),
-		[](uint8_t byte) { return byte == 0; });
+	bool is_empty = std::all_of(sequence_hash.begin(), sequence_hash.end(), [](uint8_t byte) { return byte == 0; });
 
 	if (is_empty) {
 		DigestStream<HASH256_tag> digestor;
@@ -477,8 +471,8 @@ std::array<uint8_t, 32>& Tx::hash_sequence() {
 			digestor.update(bytes);
 		}
 
-		auto hash_2 = digestor.finalize();			
-		
+		auto hash_2 = digestor.finalize();
+
 		std::copy(hash_2.begin(), hash_2.end(), sequence_hash.begin());
 	}
 
@@ -486,90 +480,78 @@ std::array<uint8_t, 32>& Tx::hash_sequence() {
 }
 
 // Get the hash of all the outputs required for the segwit hash.
-std::array<uint8_t, 32>& Tx::hash_outputs(){
+std::array<uint8_t, 32>& Tx::hash_outputs() {
 	// Serialize all transaction outputs.
-	bool is_empty = std::all_of(outputs_hash.begin(), outputs_hash.end(),
-		[](uint8_t byte) { return byte == 0; });
+	bool is_empty = std::all_of(outputs_hash.begin(), outputs_hash.end(), [](uint8_t byte) { return byte == 0; });
 
 	if (is_empty) {
-		uint32_t output_size = static_cast<uint32_t>(std::accumulate(output_txs.begin(), output_txs.end(), 0ULL, 
-		[](uint64_t sum, const TxOut& output) { return sum + output.get_size(); }));
-		
+		uint32_t output_size = static_cast<uint32_t>(
+		    std::accumulate(output_txs.begin(), output_txs.end(), 0ULL,
+		                    [](uint64_t sum, const TxOut& output) { return sum + output.get_size(); }));
+
 		std::vector<uint8_t> all_outputs(output_size);
 		auto all_outputs_iterator = all_outputs.begin();
 
 		for (const auto& tx_out : output_txs) {
 			tx_out.serialize(all_outputs_iterator, all_outputs, false);
 		}
-		
-		
+
 		// Compute the hash of all inputs.
-		auto hash = get_hash_256(all_outputs);			
+		auto hash = get_hash_256(all_outputs);
 		std::copy(hash.begin(), hash.end(), outputs_hash.begin());
 	}
 
 	return outputs_hash;
 }
-	
 
-bool Tx::is_valid(uint32_t index){
+bool Tx::is_valid(uint32_t index) {
 	auto& tx_in = input_txs[index];
 
 	std::vector<uint8_t> hash;
 
 	std::vector<uint8_t> script_pubkey_bytes = hex_to_std_vec(
-		TxInfoFetcher::fetch_script_pubkey(std_array_to_hex(tx_in.get_tx_id()), tx_in.get_tx_index(), testnet));
+	    TxInfoFetcher::fetch_script_pubkey(std_array_to_hex(tx_in.get_tx_id()), tx_in.get_tx_index(), testnet));
 
 	auto script_pubkey = Script(script_pubkey_bytes.cbegin(), script_pubkey_bytes.size());
-	
-	if(is_p2sh(script_pubkey.get_inputs().begin(), script_pubkey.get_inputs().cend())){
+
+	if (is_p2sh(script_pubkey.get_inputs().begin(), script_pubkey.get_inputs().cend())) {
 
 		auto redeem_script_bytes = tx_in.get_script().get_inputs().back().get_value();
 
 		auto redeem_script = Script(redeem_script_bytes.cbegin(), redeem_script_bytes.size());
 
-		if(is_p2wsh(redeem_script.get_inputs().cbegin(), redeem_script.get_inputs().cend())){
+		if (is_p2wsh(redeem_script.get_inputs().cbegin(), redeem_script.get_inputs().cend())) {
 			auto witness_script = tx_in.get_witness_data().back();
-			auto witness_script_iterator = witness_script.begin();
-
 			hash = get_bip143_transaction_hash(index, witness_script, witness_script.size());
-		}
-		else if(is_p2wpkh(redeem_script.get_inputs().cbegin(), redeem_script.get_inputs().cend())){
+		} else if (is_p2wpkh(redeem_script.get_inputs().cbegin(), redeem_script.get_inputs().cend())) {
 
 			auto pubkey_hash = redeem_script.get_inputs().back().get_value();
 
 			std::vector<uint8_t> script_code = create_p2pkh_out_bytes(pubkey_hash);
 
 			hash = get_bip143_transaction_hash(index, script_code);
-		}
-		else{
+		} else {
 			hash = get_transaction_hash(index, redeem_script);
 		}
-	}
-	else{
+	} else {
 
-		if(is_p2wsh(script_pubkey.get_inputs().cbegin(), script_pubkey.get_inputs().cend())){
+		if (is_p2wsh(script_pubkey.get_inputs().cbegin(), script_pubkey.get_inputs().cend())) {
 			auto witness_script = tx_in.get_witness_data().back();
-			auto witness_script_iterator = witness_script.begin();
-
 			hash = get_bip143_transaction_hash(index, witness_script, witness_script.size());
-		}
-		else if(is_p2wpkh(script_pubkey.get_inputs().cbegin(), script_pubkey.get_inputs().cend())){
+		} else if (is_p2wpkh(script_pubkey.get_inputs().cbegin(), script_pubkey.get_inputs().cend())) {
 			auto pubkey_hash = script_pubkey.get_inputs().back().get_value();
 
 			std::vector<uint8_t> script_code = create_p2pkh_out_bytes(pubkey_hash);
 
 			hash = get_bip143_transaction_hash(index, script_code);
-		}
-		else{
+		} else {
 			hash = get_transaction_hash(index, script_pubkey);
 		}
 	}
 	auto combined_script = tx_in.get_script() + script_pubkey;
-	
+
 	return combined_script.evaluate(hash, tx_in.get_witness_data()); // Evaluate the script with the hash.
 }
-
 
 bool Tx::is_valid() {
 	// Check if the fee is zero or more(No bitcoins are being created).
@@ -578,7 +560,8 @@ bool Tx::is_valid() {
 
 	bool Result = true;
 
-	// All the locking scripts(script pubkey for the inputs) have correct unlocking scripts(script sigs for the inputs)
+	// All the locking scripts(script pubkey for the inputs) have correct unlocking scripts(script sigs for the
+	// inputs)
 	for (size_t counter = 0; counter < input_txs.size() && Result; ++counter) {
 		Result = is_valid(counter);
 	}
@@ -587,89 +570,133 @@ bool Tx::is_valid() {
 }
 
 bool Tx::is_coinbase() {
-        if (input_txs.size() != 1)
-            return false;
+	if (input_txs.size() != 1)
+		return false;
 
-        TxIn& input = input_txs[0];
+	TxIn& input = input_txs[0];
 
-        const auto & transaction_id = input.get_tx_id();
+	const auto& transaction_id = input.get_tx_id();
 
-        if (!std::all_of(transaction_id.begin(), transaction_id.end(), [](uint8_t b){ return b == 0x00; }))
-            return false;
+	if (!std::all_of(transaction_id.begin(), transaction_id.end(), [](uint8_t b) { return b == 0x00; }))
+		return false;
 
-        if (input.get_tx_index() != 0xffffffff)
-            return false;
+	if (input.get_tx_index() != 0xffffffff)
+		return false;
 
-        return true;
+	return true;
 }
 
 std::optional<uint32_t> Tx::extract_coinbase_block_height() {
-    if (!is_coinbase())
-        return std::nullopt;
+	if (!is_coinbase())
+		return std::nullopt;
 
-    // Get the scriptSig of the only input
-    return big_endian_bytes_to_int<uint32_t>(input_txs[0].get_script()[0].get_value());
+	// Get the scriptSig of the only input
+	return big_endian_bytes_to_int<uint32_t>(input_txs[0].get_script()[0].get_value());
 }
 
-const nlohmann::json_abi_v3_12_0::json& TxInfoFetcher::fetch_tx(std::string&& tx_id, bool is_testnet) {
+const nlohmann::json& TxInfoFetcher::fetch_tx(std::string&& tx_id, bool is_testnet) {
+
+	// Reverse the bytes to display (big-endian) format before the cache lookup
+	// so that the cache key is always in the same format regardless of call order.
+	for (uint8_t counter = 0; counter < tx_id.size() / 2; counter += 2) {
+		std::swap(tx_id[counter], tx_id[(tx_id.size() - 1) - (1 + counter)]);
+		std::swap(tx_id[counter + 1], tx_id[(tx_id.size() - 1) - (counter)]);
+	}
 
 	auto result = cache.find(tx_id);
 
-	// We reverse the bytes, mempool.space takes it in big endian.
+	if (result == cache.end()) {
+		const std::string api_path = (is_testnet ? std::string("/testnet") : std::string()) + "/api/tx/" + tx_id;
 
-	for(uint8_t counter = 0; counter < tx_id.size()/2; counter += 2){
-		std::swap(tx_id[counter], tx_id[(tx_id.size() - 1)- (1 + counter)]);
-		std::swap(tx_id[counter + 1], tx_id[(tx_id.size() - 1)- (counter)]);
-	}
+		// Try each endpoint in order; move on if one times out, errors, or returns non-200.
+		const std::string hosts[] = {"mempool.space", "blockstream.info"};
 
-	if(result == cache.end()){
-		std::string host = "mempool.space";
-		std::string target = (is_testnet ? std::string("/testnet") : std::string()) + "/api/tx/" + tx_id;
-		int version = 11;  
+		std::string response_body;
+		std::string last_error;
 
-		net::io_context io_context;
-		ssl::context ssl_context(ssl::context::tlsv12_client);
+		for (const std::string& host : hosts) {
+			net::io_context ioc;
+			ssl::context ssl_ctx(ssl::context::tlsv12_client);
+			ssl_ctx.set_default_verify_paths();
+			ssl_ctx.set_verify_mode(ssl::verify_peer);
+			tcp::resolver resolver(ioc);
+			net::ssl::stream<beast::tcp_stream> stream(ioc, ssl_ctx);
+			stream.set_verify_callback(ssl::host_name_verification(host));
+			beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(15));
 
-		tcp::resolver resolver(io_context);
-		net::ssl::stream<beast::tcp_stream> stream(io_context, ssl_context);
+			beast::flat_buffer buf;
+			auto req = std::make_shared<http::request<http::string_body>>(http::verb::get, api_path, 11);
+			req->set(http::field::host, host);
+			req->set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+			auto res = std::make_shared<http::response<http::dynamic_body>>();
+			beast::error_code final_ec;
+			int http_status = 0;
 
-		auto const results = resolver.resolve(host, "443");
+			resolver.async_resolve(
+			    host, "443", [&, req, res](beast::error_code ec, tcp::resolver::results_type results) {
+				    if (ec) {
+					    final_ec = ec;
+					    return;
+				    }
+				    beast::get_lowest_layer(stream).async_connect(
+				        results, [&, req, res](beast::error_code ec, tcp::resolver::results_type::endpoint_type) {
+					        if (ec) {
+						        final_ec = ec;
+						        return;
+					        }
+					        SSL_set_tlsext_host_name(stream.native_handle(), host.c_str());
+					        stream.async_handshake(ssl::stream_base::client, [&, req, res](beast::error_code ec) {
+						        if (ec) {
+							        final_ec = ec;
+							        return;
+						        }
+						        http::async_write(stream, *req, [&, res](beast::error_code ec, std::size_t) {
+							        if (ec) {
+								        final_ec = ec;
+								        return;
+							        }
+							        http::async_read(stream, buf, *res, [&, res](beast::error_code ec, std::size_t) {
+								        if (ec) {
+									        final_ec = ec;
+									        return;
+								        }
+								        http_status = res->result_int();
+								        if (http_status == 200)
+									        response_body = beast::buffers_to_string(res->body().data());
+							        });
+						        });
+					        });
+				        });
+			    });
 
-		// Connect to mempool.space.
-		beast::get_lowest_layer(stream).connect(results);
+			ioc.run_for(std::chrono::seconds(15));
 
-		stream.handshake(ssl::stream_base::client);
+			if (!response_body.empty()) {
+				if (res->result() != http::status::ok) {
+					last_error = "HTTP " + std::to_string(res->result_int()) + " from " + host + api_path;
+					response_body.clear();
+					continue;
+				}
+				break;
+			}
 
-		http::request<http::string_body> request{ http::verb::get, target, version };
-		request.set(http::field::host, host);
-		request.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-
-		// Send the request.
-		http::write(stream, request);
-
-		beast::flat_buffer buffer;
-
-		http::response<http::dynamic_body> response;
-
-		// Read the response.
-		http::read(stream, buffer, response);
-
-		beast::error_code error_code;
-		stream.shutdown(error_code);
-
-		// Handle shutdown errors (stream truncated, EOF, etc.)
-		if (error_code == net::error::eof || error_code == ssl::error::stream_truncated) {
-			error_code = {};
+			last_error = final_ec ? ("HTTP request failed for " + host + api_path + ": " + final_ec.message())
+			                      : (http_status != 0 && http_status != 200
+			                             ? ("HTTP " + std::to_string(http_status) + " from " + host + api_path)
+			                             : ("HTTP request timed out for " + host + api_path));
 		}
-		else if (error_code) {
-			throw beast::system_error{ error_code };
+
+		if (response_body.empty()) {
+			throw std::runtime_error(last_error);
 		}
 
-		cache.emplace(tx_id, std::make_pair(
-								json::parse(beast::buffers_to_string(response.body().data())), 0));
+		try {
+			cache.emplace(tx_id, std::make_pair(json::parse(response_body), 0));
+		} catch (const nlohmann::json::parse_error& e) {
+			throw std::runtime_error(std::string("Failed to parse JSON for tx ") + tx_id + ": " + e.what());
+		}
 		result = cache.find(tx_id);
-	}
-	else{
+	} else {
 		result->second.second = 0;
 	}
 
@@ -678,8 +705,8 @@ const nlohmann::json_abi_v3_12_0::json& TxInfoFetcher::fetch_tx(std::string&& tx
 }
 
 int64_t TxInfoFetcher::fetch_input(std::string&& tx_id, bool is_testnet) {
-	
-	auto json_response = fetch_tx(std::forward<std::string>(tx_id),is_testnet);
+
+	auto json_response = fetch_tx(std::forward<std::string>(tx_id), is_testnet);
 
 	int64_t total_amount = 0;
 
@@ -687,12 +714,11 @@ int64_t TxInfoFetcher::fetch_input(std::string&& tx_id, bool is_testnet) {
 		for (const auto& Output : json_response["vout"]) {
 			total_amount += Output["value"].get<int64_t>();
 		}
-	}
-	catch (...) {
+	} catch (...) {
 		cache.erase(tx_id);
-        throw ParsingError(ParsingError::Type::INVALID_DATA, 
-			"The data returned from mempool.space is not a valid transaction.");
-    }
+		throw ParsingError(ParsingError::Type::INVALID_DATA,
+		                   "The data returned from mempool.space is not a valid transaction.");
+	}
 
 	return total_amount;
 }
@@ -703,30 +729,30 @@ std::string TxInfoFetcher::fetch_script_pubkey(std::string&& tx_id, uint64_t tx_
 	std::string script_pubkey;
 
 	try {
-            script_pubkey = json_response["vout"][tx_index]["scriptpubkey"].get<std::string>();
-    } catch (...) {
+		script_pubkey = json_response["vout"][tx_index]["scriptpubkey"].get<std::string>();
+	} catch (...) {
 		cache.erase(tx_id);
-        throw ParsingError(ParsingError::Type::INVALID_DATA, 
-			"The data returned from mempool.space is not a valid transaction.");
-    }
+		throw ParsingError(ParsingError::Type::INVALID_DATA,
+		                   "The data returned from mempool.space is not a valid transaction.");
+	}
 
 	return script_pubkey;
 }
 
 uint64_t TxInfoFetcher::fetch_output_amount(std::string&& tx_id, uint64_t tx_index, bool IsTestnet) {
 
-        const nlohmann::json_abi_v3_12_0::json& json_response = fetch_tx(std::forward<std::string>(tx_id), IsTestnet);
-        int64_t amount = 0;
+	const nlohmann::json& json_response = fetch_tx(std::forward<std::string>(tx_id), IsTestnet);
+	int64_t amount = 0;
 
-        try {
-            amount = json_response["vout"][tx_index]["value"].get<int64_t>();
-        } catch (...) {
-			cache.erase(tx_id);
-            throw ParsingError(ParsingError::Type::INVALID_DATA, 
-				"The data returned from mempool.space is not a valid transaction.");
-        }
+	try {
+		amount = json_response["vout"][tx_index]["value"].get<int64_t>();
+	} catch (...) {
+		cache.erase(tx_id);
+		throw ParsingError(ParsingError::Type::INVALID_DATA,
+		                   "The data returned from mempool.space is not a valid transaction.");
+	}
 
-        return amount;
-    }
+	return amount;
+}
 
-std::unordered_map<std::string, std::pair<nlohmann::json_abi_v3_12_0::json, uint32_t>> TxInfoFetcher::cache;
+std::unordered_map<std::string, std::pair<nlohmann::json, uint32_t>> TxInfoFetcher::cache;

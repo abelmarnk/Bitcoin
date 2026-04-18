@@ -7,7 +7,7 @@
 #include <optional>
 
 class ScriptInput {
-public:
+  public:
 	enum class OpCode : uint8_t {
 		OP_FALSE = 0x00,
 		OP_0 = OP_FALSE,
@@ -126,110 +126,82 @@ public:
 		OP_NOP10 = 0xb9,
 		OP_INVALIDOPCODE = 0xff
 	};
-public:
-	ScriptInput(OpCode code) :code(code) {
-	}
 
-	ScriptInput(const std::vector<uint8_t>& Number) :code(OpCode::OP_0), value(Number) {
-	}
+  public:
+	ScriptInput(OpCode code) : code(code) {}
 
-	ScriptInput(std::vector<uint8_t>&& Number) :code(OpCode::OP_0), value(std::move(Number)) {
-	}
+	ScriptInput(const std::vector<uint8_t>& Number) : code(OpCode::OP_0), value(Number) {}
 
-	ScriptInput(const ScriptInput& input) :code(input.code), value(input.value) {
-	}
+	ScriptInput(std::vector<uint8_t>&& Number) : code(OpCode::OP_0), value(std::move(Number)) {}
 
-	ScriptInput(ScriptInput&& input) noexcept :code(input.code), value(std::move(input.value)) {
-	}
+	ScriptInput(const ScriptInput& input) : code(input.code), value(input.value) {}
 
-	ScriptInput():code(OpCode::OP_0), value(std::vector<uint8_t>(1, 0x00)){
+	ScriptInput(ScriptInput&& input) noexcept : code(input.code), value(std::move(input.value)) {}
 
-	}
+	ScriptInput() : code(OpCode::OP_0), value(std::vector<uint8_t>(1, 0x00)) {}
 
-	~ScriptInput() {
-	}
+	~ScriptInput() {}
 
 	ScriptInput& operator=(const ScriptInput& input);
 
 	// Two ScriptInputs are equal if their codes and values are equal.
-	bool operator==(const ScriptInput& input)const;
+	bool operator==(const ScriptInput& input) const;
 
 	ScriptInput& operator=(ScriptInput&& input) noexcept;
 
-	inline std::vector<uint8_t> get_value() const {
-		return value;
-	}
+	inline std::vector<uint8_t> get_value() const { return value; }
 
-	inline std::vector<uint8_t>& get_value() {
-		return value;
-	}
+	inline std::vector<uint8_t>& get_value() { return value; }
 
-	static std::optional<uint8_t> get_int_from_opcode(OpCode code){
-		if(static_cast<uint8_t>(code) >= static_cast<uint8_t>(ScriptInput::OpCode::OP_1) && 
-				static_cast<uint8_t>(code) <= static_cast<uint8_t>(ScriptInput::OpCode::OP_16)) {
-					return static_cast<uint8_t>(code) - 
-					static_cast<uint8_t>(ScriptInput::OpCode::OP_1) + 1;
+	static std::optional<uint8_t> get_int_from_opcode(OpCode code) {
+		if (static_cast<uint8_t>(code) >= static_cast<uint8_t>(ScriptInput::OpCode::OP_1) &&
+		    static_cast<uint8_t>(code) <= static_cast<uint8_t>(ScriptInput::OpCode::OP_16)) {
+			return static_cast<uint8_t>(code) - static_cast<uint8_t>(ScriptInput::OpCode::OP_1) + 1;
 		}
 
 		return std::nullopt;
-			
 	}
 
-	std::optional<uint8_t> get_int_from_opcode(){
-		if(static_cast<uint8_t>(code) >= static_cast<uint8_t>(ScriptInput::OpCode::OP_1) && 
-				static_cast<uint8_t>(code) <= static_cast<uint8_t>(ScriptInput::OpCode::OP_16)) {
-					return static_cast<uint8_t>(code) - 
-					static_cast<uint8_t>(ScriptInput::OpCode::OP_1) + 1;
+	std::optional<uint8_t> get_int_from_opcode() {
+		if (static_cast<uint8_t>(code) >= static_cast<uint8_t>(ScriptInput::OpCode::OP_1) &&
+		    static_cast<uint8_t>(code) <= static_cast<uint8_t>(ScriptInput::OpCode::OP_16)) {
+			return static_cast<uint8_t>(code) - static_cast<uint8_t>(ScriptInput::OpCode::OP_1) + 1;
 		}
 
 		return std::nullopt;
-			
 	}
 
-	uint32_t get_opcode_as_int(){
-					return static_cast<uint32_t>(code);
-	}
+	uint32_t get_opcode_as_int() { return static_cast<uint32_t>(code); }
 
-	inline OpCode get_opcode() const {
-		return code;
-	}
+	inline OpCode get_opcode() const { return code; }
 
-private:
+  private:
 	OpCode code;
 	std::vector<uint8_t> value;
-
 };
 
 class Script {
 
-public:
-
+  public:
 	class OpCodeFunctionBase {
-	public:
+	  public:
 		virtual ~OpCodeFunctionBase() = default;
 		virtual void call() = 0; // This is just a placeholder; we'll use derived class methods.
 	};
 
-	template<typename Ret, typename... Args>
-	class OpCodeFunction : public OpCodeFunctionBase {
-	private:
+	template <typename Ret, typename... Args> class OpCodeFunction : public OpCodeFunctionBase {
+	  private:
 		std::function<Ret(Args...)> func;
-	public:
+
+	  public:
 		OpCodeFunction(std::function<Ret(Args...)> f) : func(f) {}
 
-		Ret call(Args... args) {
-			return func(args...);
-		}
+		Ret call(Args... args) { return func(args...); }
 
-		void call() {
-
-		}
-
+		void call() {}
 	};
 
-
-	Script() {
-	}
+	Script() {}
 
 	Script(std::deque<ScriptInput>& input) {
 		initialize_opcode_functions();
@@ -261,17 +233,11 @@ public:
 		inputs = std::move(input.inputs);
 	}
 
-	~Script() {
-	}
+	~Script() {}
 
-	ScriptInput& operator[](size_t Index) {
-		return inputs[Index];
-	}
+	ScriptInput& operator[](size_t Index) { return inputs[Index]; }
 
-	
-	const ScriptInput& operator[](size_t Index) const{
-		return inputs[Index];
-	}
+	const ScriptInput& operator[](size_t Index) const { return inputs[Index]; }
 
 	void initialize_opcode_functions();
 
@@ -285,37 +251,39 @@ public:
 		return *this;
 	}
 
-	void serialize(std::vector<uint8_t>& result, std::vector<uint8_t>::iterator& start, bool should_adjust_iterator = true) const;
+	void serialize(std::vector<uint8_t>& result, std::vector<uint8_t>::iterator& start,
+	               bool should_adjust_iterator = true) const;
 
-	void serialize(std::vector<uint8_t>& result, bool should_adjust_iterator = true) const{
+	void serialize(std::vector<uint8_t>& result, bool should_adjust_iterator = true) const {
 		auto iterator = result.begin();
 		serialize(result, iterator, should_adjust_iterator);
 	}
 
 	void inputs_from_bytes(std::vector<uint8_t>::const_iterator&& input, uint32_t size, bool prepend);
 
-	void prepend_parse(std::vector<uint8_t>::const_iterator&& input){
-		uint32_t input_size = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(input)); // Note: Don't attempt to move the parse_varint call inside the 
-												// parse_from_non_prefixed_size call directly parse_varint modifies input
-												// and the order that the arguments is captured may not be as expected.
-			
+	void prepend_parse(std::vector<uint8_t>::const_iterator&& input) {
+		uint32_t input_size = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(
+		    input)); // Note: Don't attempt to move the parse_varint call inside the
+		             // parse_from_non_prefixed_size call directly parse_varint modifies input
+		             // and the order that the arguments is captured may not be as expected.
+
 		inputs_from_bytes(std::forward<std::vector<uint8_t>::const_iterator>(input), input_size, true);
 	}
 
-	void append_parse(std::vector<uint8_t>::const_iterator&& input){
-		uint32_t input_size = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(input)); // Note: Don't attempt to move the parse_varint call inside the 
-												// parse_from_non_prefixed_size call directly parse_varint modifies input
-												// and the order that the arguments is captured may not be as expected.
-			
-		
+	void append_parse(std::vector<uint8_t>::const_iterator&& input) {
+		uint32_t input_size = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(
+		    input)); // Note: Don't attempt to move the parse_varint call inside the
+		             // parse_from_non_prefixed_size call directly parse_varint modifies input
+		             // and the order that the arguments is captured may not be as expected.
+
 		inputs_from_bytes(std::forward<std::vector<uint8_t>::const_iterator>(input), input_size, false);
 	}
 
-	void prepend_parse_from_non_prefixed_size(std::vector<uint8_t>::const_iterator&& input, uint32_t size){
+	void prepend_parse_from_non_prefixed_size(std::vector<uint8_t>::const_iterator&& input, uint32_t size) {
 		inputs_from_bytes(std::forward<std::vector<uint8_t>::const_iterator>(input), size, true);
 	}
 
-	void append_parse_from_non_prefixed_size(std::vector<uint8_t>::const_iterator&& input, uint32_t size){
+	void append_parse_from_non_prefixed_size(std::vector<uint8_t>::const_iterator&& input, uint32_t size) {
 		inputs_from_bytes(std::forward<std::vector<uint8_t>::const_iterator>(input), size, false);
 	}
 
@@ -326,61 +294,50 @@ public:
 
 	void parse(std::vector<uint8_t>::const_iterator&& input) {
 
-		uint32_t input_size = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(input)); // Note: Don't attempt to move the parse_varint call inside the 
-												// parse_from_non_prefixed_size call directly parse_varint modifies input
-												// and the order that the arguments is captured may not be as expected.
-														
+		uint32_t input_size = parse_varint(std::forward<std::vector<uint8_t>::const_iterator>(
+		    input)); // Note: Don't attempt to move the parse_varint call inside the
+		             // parse_from_non_prefixed_size call directly parse_varint modifies input
+		             // and the order that the arguments is captured may not be as expected.
+
 		parse_from_non_prefixed_size(std::forward<std::vector<uint8_t>::const_iterator>(input), input_size);
-
 	}
-
 
 	// Evaluate the script based on the opcodes and data in "inputs".
 	// These functions are actually a simplification of Bitcoin's actual interpreter.
 	// Assumes both the script pubkey and script sig are present.
-	bool evaluate(const std::vector<uint8_t>& hash = std::vector<uint8_t>(), const std::vector<std::vector<uint8_t>>& witness_data = std::vector<std::vector<uint8_t>>());
+	bool evaluate(const std::vector<uint8_t>& hash = std::vector<uint8_t>(),
+	              const std::vector<std::vector<uint8_t>>& witness_data = std::vector<std::vector<uint8_t>>());
 
 	// Assumes the script sig is present and the script pubkey is passed.
-	bool evaluate_with_script_pubkey(const std::vector<uint8_t>& hash, const Script& script_pubkey, const std::vector<std::vector<uint8_t>>& witness_data = std::vector<std::vector<uint8_t>>());
+	bool evaluate_with_script_pubkey(
+	    const std::vector<uint8_t>& hash, const Script& script_pubkey,
+	    const std::vector<std::vector<uint8_t>>& witness_data = std::vector<std::vector<uint8_t>>());
 
 	// Assumes the script pubkey is present and the script sig is passed
-	bool evaluate_with_script_sig(const std::vector<uint8_t>& hash, const Script& script_sig, const std::vector<std::vector<uint8_t>>& witness_data = std::vector<std::vector<uint8_t>>());
+	bool evaluate_with_script_sig(
+	    const std::vector<uint8_t>& hash, const Script& script_sig,
+	    const std::vector<std::vector<uint8_t>>& witness_data = std::vector<std::vector<uint8_t>>());
 
 	// Combine two scripts together.
 	Script operator+(const Script& Other) const;
 
-	void prepend(const ScriptInput& input) {
-		inputs.push_front(input);
-	}
+	void prepend(const ScriptInput& input) { inputs.push_front(input); }
 
-	void prepend(ScriptInput&& input) {
-		inputs.push_front(std::move(input));
-	}
-	void append(const ScriptInput& input) {
-		inputs.push_back(input);
-	}
+	void prepend(ScriptInput&& input) { inputs.push_front(std::move(input)); }
+	void append(const ScriptInput& input) { inputs.push_back(input); }
 
-	void append(ScriptInput&& input) {
-		inputs.push_back(std::move(input));
-	}
+	void append(ScriptInput&& input) { inputs.push_back(std::move(input)); }
 
-	void clear() {
-		inputs.clear();
-	}
+	void clear() { inputs.clear(); }
 
-	std::deque<ScriptInput>& get_inputs() {
-		return inputs;
-	}
+	std::deque<ScriptInput>& get_inputs() { return inputs; }
 
-	uint32_t get_input_count() const{
-		return static_cast<uint32_t>(inputs.size());
-	}
+	uint32_t get_input_count() const { return static_cast<uint32_t>(inputs.size()); }
 
 	// Get the size in bytes of the serialization of the script.
-    uint32_t get_size() const;
+	uint32_t get_size() const;
 
-
-private:
+  private:
 	// Stores the opcodes and data.
 	std::deque<ScriptInput> inputs;
 	// Stores the function for each opcode
@@ -401,7 +358,8 @@ std::vector<uint8_t> create_p2pkh_out_bytes(const std::vector<uint8_t>& hash_160
 Script create_p2pkh_in(const std::vector<uint8_t>& signature, const std::vector<uint8_t>& public_key);
 
 // Create a Pay to Multisig (P2MS) ScriptPubKey.
-Script create_p2ms_out(uint8_t signature_count, uint8_t pubkey_count, const std::vector<std::vector<uint8_t>>& public_keys);
+Script create_p2ms_out(uint8_t signature_count, uint8_t pubkey_count,
+                       const std::vector<std::vector<uint8_t>>& public_keys);
 
 // Create a Pay to Multisig (P2MS) ScriptSig.
 Script create_p2ms_in(const std::vector<std::vector<uint8_t>>& signatures);
@@ -412,12 +370,11 @@ Script create_p2sh_out(const std::vector<uint8_t>& hash_160);
 // Create a Pay to Witness Public Key Hash (P2WPKH) ScriptPubKey.
 Script create_p2wpkh_out(const std::vector<uint8_t>& h160);
 
-
 // Check if the script is a Pay to Script Hash (P2SH).
 bool is_p2sh(std::deque<ScriptInput>::const_iterator iterator, std::deque<ScriptInput>::const_iterator end);
 
-// Check if the script is a Pay to witness public key hash (P2WPKH).
+// Check if the script is a Pay to Witness Script Hash (P2WSH).
 bool is_p2wsh(std::deque<ScriptInput>::const_iterator iterator, std::deque<ScriptInput>::const_iterator end);
 
-// Check if the script is a Pay to witness Script Hash (P2WSH).
+// Check if the script is a Pay to Witness Public Key Hash (P2WPKH).
 bool is_p2wpkh(std::deque<ScriptInput>::const_iterator iterator, std::deque<ScriptInput>::const_iterator end);
