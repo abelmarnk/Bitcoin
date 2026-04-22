@@ -1,6 +1,6 @@
 # Bitcoin Project
 
-This is a C++23 reimplementation of the concepts from Jimmy Song's *Programming Bitcoin*.
+This is a modular Bitcoin protocol implementation exploring transaction validation, scripting, and networking.
 ## Current State
 
 The project currently does the following:
